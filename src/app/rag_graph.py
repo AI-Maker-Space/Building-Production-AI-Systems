@@ -25,7 +25,8 @@ class State(TypedDict):
     response: str
 
 # ---------- Defaults & prompt ----------
-RAG_PROMPT = """You are a helpful assistant who answers questions based on provided context only.
+RAG_PROMPT = """You are a helpful assistant who answers questions 
+based on provided context only.
 Do not use outside knowledge.
 
 ### Question
@@ -60,7 +61,8 @@ def upsert_pdf_for_document(
     chunk_overlap: int = 120,
 ) -> int:
     """
-    Load a single PDF, split, embed, and upsert into Qdrant with metadata {document_id}.
+    Load a single PDF, split, embed, and upsert into Qdrant with 
+    metadata {document_id}.
     Returns number of chunks added.
     """
     # 1) Load one PDF
@@ -143,7 +145,8 @@ def build_generalized_graph(
     collection_name: str = "use_case_data",
 ) -> StateGraph:
     """
-    Build a LangGraph that searches across ALL documents in the collection (no document filtering).
+    Build a LangGraph that searches across ALL documents in 
+    the collection (no document filtering).
     """
     # build a generalized retriever (no document filter)
     if client is None:
@@ -162,12 +165,7 @@ def build_generalized_graph(
 
     def retrieve(state: State):
         context = retriever.invoke(state["question"])
-        print(f"DEBUG: Retrieved {len(context)} documents for question: {state['question']}")
-        if context:
-            print(f"DEBUG: First document content preview: {context[0].page_content[:100]}...")
-            print(f"DEBUG: First document metadata: {context[0].metadata}")
-        else:
-            print("DEBUG: No documents retrieved!")
+        
         return {"context": context}
 
     def generate(state: State):
