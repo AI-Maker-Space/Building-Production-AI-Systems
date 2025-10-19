@@ -511,6 +511,8 @@ class TestErrorHandling:
 class TestIntegrationScenarios:
     """Integration-style tests (still using mocks but testing workflows)"""
     
+
+    
     def test_full_rag_workflow_simple(self):
         """Test a complete RAG workflow with simple strategy"""
         with patch('app.rag_graph.QdrantClient') as mock_client, \

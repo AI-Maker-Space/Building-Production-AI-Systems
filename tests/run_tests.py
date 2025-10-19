@@ -3,9 +3,10 @@
 Test runner script for the RAG system.
 
 This script provides different ways to run the test suite with various configurations.
+Located in the tests/ directory but runs from the project root.
 
 Examples:
-    # Run all fast tests
+    # From the tests directory:
     python run_tests.py --type fast
     
     # Run only RAG core tests
@@ -16,6 +17,12 @@ Examples:
     
     # Run with coverage
     python run_tests.py --type fast --coverage
+    
+    # Run slow tests
+    python run_tests.py --type slow
+    
+    # From project root:
+    python tests/run_tests.py --type fast
 """
 
 import os
@@ -29,13 +36,13 @@ def run_tests(test_type="all", verbose=True, coverage=False, test_file=None):
     Run tests with specified configuration.
     
     Args:
-        test_type: Type of tests to run ("unit", "integration", "all", "fast")
+        test_type: Type of tests to run ("unit", "all", "fast", "slow")
         verbose: Whether to run in verbose mode
         coverage: Whether to include coverage reporting
         test_file: Specific test file to run (optional)
     """
-    # Change to project root
-    project_root = Path(__file__).parent
+    # Change to project root (parent of tests directory)
+    project_root = Path(__file__).parent.parent
     os.chdir(project_root)
     
     # Base pytest command
@@ -50,17 +57,14 @@ def run_tests(test_type="all", verbose=True, coverage=False, test_file=None):
     
     # Configure test selection based on type
     if test_type == "unit":
-        cmd.extend(["-m", "not integration and not slow"])
-    elif test_type == "integration":
-        cmd.extend(["-m", "integration"])
-        cmd.append("--run-integration")
+        cmd.extend(["-m", "not slow"])
     elif test_type == "fast":
-        cmd.extend(["-m", "not slow and not integration"])
+        cmd.extend(["-m", "not slow"])
     elif test_type == "slow":
         cmd.extend(["-m", "slow"])
         cmd.append("--run-slow")
     elif test_type == "all":
-        cmd.extend(["--run-integration", "--run-slow"])
+        cmd.append("--run-slow")
     
     # Add test directory or specific file
     if test_file:
@@ -90,7 +94,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run tests for the RAG system")
     parser.add_argument(
         "--type", 
-        choices=["unit", "integration", "all", "fast", "slow"],
+        choices=["unit", "all", "fast", "slow"],
         default="fast",
         help="Type of tests to run (default: fast)"
     )
@@ -111,13 +115,7 @@ def main():
     
     args = parser.parse_args()
     
-    # Check for API key if running integration tests
-    if args.type in ["integration", "all"]:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key or api_key == "test-key-for-testing":
-            print("⚠️  Warning: OPENAI_API_KEY not set. Integration tests will be skipped.")
-            print("   Set your API key: export OPENAI_API_KEY=your_key_here")
-            print()
+
     
     # Run the tests
     success = run_tests(

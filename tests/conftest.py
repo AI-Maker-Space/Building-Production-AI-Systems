@@ -259,13 +259,7 @@ def sample_state():
 def pytest_configure(config):
     """Configure pytest with custom markers"""
     config.addinivalue_line(
-        "markers", "integration: mark test as integration test"
-    )
-    config.addinivalue_line(
         "markers", "slow: mark test as slow running"
-    )
-    config.addinivalue_line(
-        "markers", "requires_api_key: mark test as requiring real API key"
     )
 
 
@@ -273,32 +267,14 @@ def pytest_configure(config):
 def pytest_collection_modifyitems(config, items):
     """Modify test collection to add markers automatically"""
     for item in items:
-        # Mark tests requiring API calls
-        if "test_integration" in item.name or "requires_api_key" in item.keywords:
-            item.add_marker(pytest.mark.requires_api_key)
-        
         # Mark slow tests
         if "performance" in item.name or "compare" in item.name:
             item.add_marker(pytest.mark.slow)
 
 
-# Skip tests that require real API keys unless explicitly enabled
-def pytest_runtest_setup(item):
-    """Setup function run before each test"""
-    if "requires_api_key" in item.keywords:
-        if not os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY") == "test-key-for-testing":
-            pytest.skip("Skipping test that requires real API key")
-
-
 # Custom pytest command line options
 def pytest_addoption(parser):
     """Add custom command line options"""
-    parser.addoption(
-        "--run-integration",
-        action="store_true",
-        default=False,
-        help="Run integration tests that require API keys"
-    )
     parser.addoption(
         "--run-slow",
         action="store_true", 

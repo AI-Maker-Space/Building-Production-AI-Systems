@@ -1,8 +1,10 @@
 # Run specific test files
 
 ```bash
-python run_tests.py --file test_rag_graph.py
-python run_tests.py --file test_app.py
+cd tests
+python run_tests.py --type fast 
+python run_tests.py --file tests/test_rag_graph.py
+python run_tests.py --file tests/test_app.py
 ```
 
 # Run by test type
@@ -10,12 +12,7 @@ python run_tests.py --file test_app.py
 ```bash
 python run_tests.py --type fast
 python run_tests.py --type unit
-python run_tests.py --type integration
+python run_tests.py --type slow
+python run_tests.py --type all
 ```
 
-# Additional options
-```bash
-python run_tests.py --file test_rag_graph.py --coverage
-python run_tests.py --type fast --quiet
-python run_tests.py --help
-```
