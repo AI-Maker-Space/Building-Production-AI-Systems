@@ -148,7 +148,7 @@ def ask_with_performance_metrics(
 def compare_graph_types(
     question: str = Form(...),
     k: int = Form(5),
-    graph_types: str = Form("simple,multi_query,ensemble")  # Comma-separated list
+    graph_types: str = Form("simple,multi_query,ensemble,hybrid")  # Comma-separated list
 ):
     """Compare different graph types for the same question"""
     
