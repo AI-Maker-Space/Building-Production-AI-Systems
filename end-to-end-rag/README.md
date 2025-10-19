@@ -6,13 +6,13 @@ This directory contains the source code for a **Retrieval-Augmented Generation (
 
 The application consists of two main components:
 
-### 🚀 FastAPI Backend (`app/app.py`)
+### 🚀 FastAPI Backend (`src/app/app.py`)
 - **Document Upload**: Accepts PDF files and processes them into searchable chunks
 - **Question Answering**: Provides a chat interface to query uploaded documents
 - **Vector Storage**: Uses Qdrant (in-memory) for efficient document retrieval
 - **AI Integration**: Leverages OpenAI's GPT-4 and embedding models
 
-### 🧠 RAG Graph System (`app/rag_graph.py`)
+### 🧠 RAG Graph System (`src/app/rag_graph.py`)
 - **Document Processing**: Chunks PDFs using LangChain's text splitters
 - **Vector Embeddings**: Creates embeddings using OpenAI's `text-embedding-3-small`
 - **Graph-based RAG**: Implements a LangGraph workflow for context retrieval and response generation
