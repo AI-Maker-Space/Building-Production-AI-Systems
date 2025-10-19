@@ -48,7 +48,6 @@ class PerformanceMetrics(BaseModel):
     generate_time: float
     input_tokens: int
     output_tokens: int
-    estimated_cost: float
     retrieved_documents: int
     graph_type: str
 
@@ -252,9 +251,9 @@ def get_performance_comparison(
         summary = {
             "fastest_total_time": min(successful_results.values(), key=lambda x: x["total_time"]),
             "slowest_total_time": max(successful_results.values(), key=lambda x: x["total_time"]),
-            "lowest_cost": min(successful_results.values(), key=lambda x: x["estimated_cost"]),
-            "highest_cost": max(successful_results.values(), key=lambda x: x["estimated_cost"]),
             "most_documents": max(successful_results.values(), key=lambda x: x["retrieved_documents"]),
+            "lowest_tokens": min(successful_results.values(), key=lambda x: x["input_tokens"] + x["output_tokens"]),
+            "highest_tokens": max(successful_results.values(), key=lambda x: x["input_tokens"] + x["output_tokens"]),
         }
         results["_summary"] = summary
     

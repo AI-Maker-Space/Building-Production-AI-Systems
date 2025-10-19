@@ -11,7 +11,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers.multi_query import MultiQueryRetriever
-from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain.retrievers.ensemble import EnsembleRetriever
 
 from langchain_qdrant import QdrantVectorStore
@@ -28,7 +27,6 @@ from langgraph.graph import START, StateGraph
 class GraphType(Enum):
     SIMPLE = "simple"
     MULTI_QUERY = "multi_query"
-    CONTEXTUAL_COMPRESSION = "contextual_compression"
     ENSEMBLE = "ensemble"
     HYBRID = "hybrid"
 
@@ -46,7 +44,7 @@ class EnhancedState(TypedDict):
     retrieve_time: Optional[float]
     generate_time: Optional[float]
     total_time: Optional[float]
-    # Cost tracking
+    # Token tracking (for observability)
     input_tokens: int
     output_tokens: int
     retrieval_count: int
@@ -71,18 +69,6 @@ def estimate_tokens(text: str) -> int:
     """Rough token estimation (1 token ≈ 4 characters for OpenAI models)"""
     return len(text) // 4
 
-def calculate_cost(input_tokens: int, output_tokens: int, model: str = "gpt-4.1-nano") -> float:
-    """Calculate estimated cost based on token usage"""
-    # Simplified cost calculation - update with actual pricing
-    if "gpt-4" in model.lower():
-        input_cost = input_tokens * 0.00003  # $0.03 per 1K tokens
-        output_cost = output_tokens * 0.00006  # $0.06 per 1K tokens
-    else:
-        input_cost = input_tokens * 0.0000015  # Fallback pricing
-        output_cost = output_tokens * 0.000002
-    
-    return (input_cost + output_cost) / 1000  # Convert to actual cost
-
 def ask(graph: StateGraph, question: str) -> str:
     out = graph.invoke({"question": question})
     return out["response"]
@@ -96,12 +82,6 @@ def ask_with_metrics(graph: StateGraph, question: str) -> Dict[str, Any]:
     if "total_time" not in out or out["total_time"] is None:
         out["total_time"] = time.time() - start_time
     
-    # Estimate cost
-    estimated_cost = calculate_cost(
-        out.get("input_tokens", 0),
-        out.get("output_tokens", 0)
-    )
-    
     return {
         "response": out["response"],
         "metrics": {
@@ -110,7 +90,6 @@ def ask_with_metrics(graph: StateGraph, question: str) -> Dict[str, Any]:
             "generate_time": out.get("generate_time", 0),
             "input_tokens": out.get("input_tokens", 0),
             "output_tokens": out.get("output_tokens", 0),
-            "estimated_cost": estimated_cost,
             "retrieved_documents": out.get("retrieved_documents", 0),
             "graph_type": out.get("graph_type", "unknown")
         }
