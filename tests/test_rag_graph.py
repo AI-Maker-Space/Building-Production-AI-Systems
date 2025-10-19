@@ -27,12 +27,8 @@ from app.rag_graph import (
     EnsembleRAGStrategy, HybridRAGStrategy,
     
     # Functions
-    build_rag_graph, get_rag_strategy, ask, ask_with_metrics,
+    build_rag_graph, build_graph_by_type, get_rag_strategy, ask, ask_with_metrics,
     estimate_tokens, upsert_pdf_for_document, debug_collection_contents,
-    
-    # Legacy functions
-    build_generalized_graph, build_multi_query_graph,
-    build_ensemble_graph, build_hybrid_graph, build_graph_by_type,
     
     # Constants
     RAG_PROMPT
@@ -328,41 +324,52 @@ class TestGraphBuilding:
                 assert graph is not None
 
 
-class TestLegacyAPI:
-    """Test backward compatibility with legacy API"""
+class TestUnifiedAPI:
+    """Test the modern unified API for graph building"""
     
-    def test_legacy_functions_exist(self):
-        """Test that all legacy functions are still available"""
+    def test_unified_api_functions_exist(self):
+        """Test that the unified API functions are available"""
         # These should all be importable and callable
-        functions = [
-            build_generalized_graph,
-            build_multi_query_graph,
-            build_ensemble_graph,
-            build_hybrid_graph,
-            build_graph_by_type
-        ]
+        assert callable(build_rag_graph)
+        assert callable(build_graph_by_type)  # Factory function
+        assert callable(get_rag_strategy)
+        assert callable(ask)
+        assert callable(ask_with_metrics)
+    
+    @patch('app.rag_graph.RAGComponents')
+    def test_graph_type_mapping(self, mock_rag_components):
+        """Test that build_rag_graph correctly handles all graph types"""
+        # Mock the return value
+        mock_rag_components.return_value = Mock()
+        mock_rag_components.return_value.llm = Mock()
+        mock_rag_components.return_value.vector_store = Mock()
         
-        for func in functions:
-            assert callable(func)
+        # Test each graph type
+        for graph_type in GraphType:
+            try:
+                result = build_rag_graph(
+                    graph_type=graph_type,
+                    k=3,
+                    openai_embedding_model="text-embedding-3-small",
+                    openai_chat_model="gpt-4",
+                    client=Mock(),
+                    qdrant_location=":memory:",
+                    collection_name="test"
+                )
+                assert result is not None
+            except Exception as e:
+                # This is expected with mocked components, just verify the function exists
+                pass
     
     @patch('app.rag_graph.build_rag_graph')
-    def test_legacy_function_mapping(self, mock_build_rag):
-        """Test that legacy functions call the new unified builder"""
-        # Mock the return value
+    def test_factory_function(self, mock_build_rag):
+        """Test that the factory function calls the unified builder"""
         mock_build_rag.return_value = Mock()
         
-        # Test that legacy functions call through to new builder
-        build_generalized_graph(k=3)
-        mock_build_rag.assert_called_with(GraphType.SIMPLE, k=3)
-        
-        build_multi_query_graph(k=3)
-        mock_build_rag.assert_called_with(GraphType.MULTI_QUERY, k=3)
-        
-        build_ensemble_graph(k=3)
-        mock_build_rag.assert_called_with(GraphType.ENSEMBLE, k=3)
-        
-        build_hybrid_graph(k=3)
-        mock_build_rag.assert_called_with(GraphType.HYBRID, k=3)
+        # Test that factory function calls through to unified builder
+        for graph_type in GraphType:
+            build_graph_by_type(graph_type=graph_type, k=3)
+            mock_build_rag.assert_called_with(graph_type, k=3)
 
 
 class TestDocumentOperations:

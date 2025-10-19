@@ -411,25 +411,9 @@ def build_rag_graph(
     
     return graph_builder.compile()
 
-# ---------- Legacy API Compatibility ----------
-def build_generalized_graph(**kwargs) -> StateGraph:
-    """Legacy function for backward compatibility"""
-    return build_rag_graph(GraphType.SIMPLE, **kwargs)
-
-def build_multi_query_graph(**kwargs) -> StateGraph:
-    """Legacy function for backward compatibility"""
-    return build_rag_graph(GraphType.MULTI_QUERY, **kwargs)
-
-def build_ensemble_graph(**kwargs) -> StateGraph:
-    """Legacy function for backward compatibility"""
-    return build_rag_graph(GraphType.ENSEMBLE, **kwargs)
-
-def build_hybrid_graph(**kwargs) -> StateGraph:
-    """Legacy function for backward compatibility"""
-    return build_rag_graph(GraphType.HYBRID, **kwargs)
-
+# ---------- Factory Function ----------
 def build_graph_by_type(graph_type: GraphType, **kwargs) -> StateGraph:
-    """Factory function to build different graph types - now uses unified builder"""
+    """Factory function to build different graph types using the unified builder"""
     return build_rag_graph(graph_type, **kwargs)
 
 # ---------- Utility Functions ----------

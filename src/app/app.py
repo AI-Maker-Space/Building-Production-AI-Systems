@@ -10,9 +10,8 @@ from qdrant_client import QdrantClient
 
 from .rag_graph import (
     upsert_pdf_for_document,
-    build_generalized_graph,
+    build_rag_graph,  # Modern unified builder
     build_graph_by_type,
-    build_rag_graph,  # New unified builder
     ask as run_graph,
     ask_with_metrics,
     debug_collection_contents,
@@ -102,7 +101,8 @@ def debug_collection():
 @app.post("/ask-simple", response_model=AskResponse)
 def ask_simple(question: str = Form(...), k: int = Form(5)):
     """Simple endpoint to ask questions across all documents"""
-    graph = build_generalized_graph(
+    graph = build_rag_graph(
+        graph_type=GraphType.SIMPLE,
         k=k,
         openai_embedding_model=EMBED_MODEL,
         openai_chat_model=CHAT_MODEL,
@@ -127,7 +127,7 @@ def ask_with_performance_metrics(
     except ValueError:
         raise HTTPException(400, f"Invalid graph type. Must be one of: {[t.value for t in GraphType]}")
     
-    graph = build_graph_by_type(
+    graph = build_rag_graph(
         graph_type=graph_type_enum,
         k=k,
         openai_embedding_model=EMBED_MODEL,
@@ -161,7 +161,7 @@ def compare_graph_types(
         try:
             graph_type_enum = GraphType(graph_type_str)
             
-            graph = build_graph_by_type(
+            graph = build_rag_graph(
                 graph_type=graph_type_enum,
                 k=k,
                 openai_embedding_model=EMBED_MODEL,
@@ -230,7 +230,7 @@ def get_performance_comparison(
     
     for graph_type in GraphType:
         try:
-            graph = build_graph_by_type(
+            graph = build_rag_graph(
                 graph_type=graph_type,
                 k=k,
                 openai_embedding_model=EMBED_MODEL,

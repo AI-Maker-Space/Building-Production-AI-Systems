@@ -108,7 +108,7 @@ class TestFileUpload:
 class TestQueryEndpoints:
     """Test query processing endpoints"""
     
-    @patch('app.app.build_generalized_graph')
+    @patch('app.app.build_rag_graph')
     def test_simple_query_success(self, mock_build_graph):
         """Test successful simple query"""
         # Mock the graph and its response
