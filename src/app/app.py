@@ -12,6 +12,7 @@ from .rag_graph import (
     upsert_pdf_for_document,
     build_generalized_graph,
     build_graph_by_type,
+    build_rag_graph,  # New unified builder
     ask as run_graph,
     ask_with_metrics,
     debug_collection_contents,
