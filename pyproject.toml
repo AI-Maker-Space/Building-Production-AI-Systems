@@ -19,6 +19,7 @@ dependencies = [
     "pymupdf>=1.26.1",
     "python-dotenv==1.0.1",
     "python-multipart",
+    "rank-bm25",
 ]
 
 [project.optional-dependencies]
